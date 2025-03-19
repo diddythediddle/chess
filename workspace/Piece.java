@@ -90,10 +90,12 @@ public class Piece {
     }
 
     /**
-     * Determines the legal moves for the piece.
-     * Pre-condition: The board must be an 8x8 array of Square objects, and start must be a valid square.
+    * Determines the legal moves for the piece.
+   * This piece moves in an extended knight pattern, jumping either 3 squares in one direction 
+    * and 1 square perpendicular or 1 square in one direction and 3 squares perpendicular.
+    * Pre-condition: The board must be an 8x8 array of Square objects, and start must be a valid square.
      * Post-condition: Returns an ArrayList of squares that the piece can legally move to.
-     */
+    */
     public ArrayList<Square> getLegalMoves(Board b, Square start) {
         ArrayList<Square> moves = new ArrayList<>();
         int row = start.getRow();
