@@ -24,201 +24,271 @@ import javax.swing.*;
  */
 @SuppressWarnings("serial")
 public class Board extends JPanel implements MouseListener, MouseMotionListener {
-    
+    private static final String RESOURCES_WBISHOP_PNG = "wbishop.png";
+    private static final String RESOURCES_BBISHOP_PNG = "bbishop.png";
     private static final String RESOURCES_WKNIGHT_PNG = "wknight.png";
     private static final String RESOURCES_BKNIGHT_PNG = "bknight.png";
-    
-    private final Square[][] board; 
-    private final GameWindow g;      
-    private boolean whiteTurn;      
-    
-    private Piece currPiece;       
-    private Square fromMoveSquare;  
-    
-    private int currX;             
-    private int currY;              
+    private static final String RESOURCES_WROOK_PNG = "wrook.png";
+    private static final String RESOURCES_BROOK_PNG = "brook.png";
+    private static final String RESOURCES_WKING_PNG = "wking.png";
+    private static final String RESOURCES_BKING_PNG = "bking.png";
+    private static final String RESOURCES_BQUEEN_PNG = "bqueen.png";
+    private static final String RESOURCES_WQUEEN_PNG = "wqueen.png";
+    private static final String RESOURCES_WPAWN_PNG = "wpawn.png";
+    private static final String RESOURCES_BPAWN_PNG = "bpawn.png";
 
-    /**
-     * Constructor to initialize the board and pieces.
-     * Pre-condition: The GameWindow object is passed for managing game state.
-     * Post-condition: The board is initialized with empty squares and pieces.
-     */
+
+    private final Square[][] board;
+    private final GameWindow g;
+    private boolean whiteTurn;
+
+
+    private Piece currPiece;
+    private Square fromMoveSquare;
+    private int currX;
+    private int currY;
+
+
     public Board(GameWindow g) {
         this.g = g;
         board = new Square[8][8];
-        setLayout(new GridLayout(8, 8, 0, 0)); // Grid layout for 8x8 chessboard
+        setLayout(new GridLayout(8, 8, 0, 0));
+
+
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
 
+
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
-                boolean isWhite = (row + col) % 2 == 0; 
+                boolean isWhite = (row + col) % 2 == 0;
                 board[row][col] = new Square(this, isWhite, row, col);
                 this.add(board[row][col]);
             }
         }
 
+
         initializePieces();
+
 
         this.setPreferredSize(new Dimension(400, 400));
         this.setMaximumSize(new Dimension(400, 400));
         this.setMinimumSize(this.getPreferredSize());
         this.setSize(new Dimension(400, 400));
 
+
         whiteTurn = true;
     }
 
-    /**
-     * Initializes pieces at their starting positions.
-     * Pre-condition: The squares are initialized and empty.
-     * Post-condition: Pieces are placed on the board in their initial positions.
-     */
+/**
+ * Precondition: The board is an 8x8 grid of Square objects.
+ * Postcondition: Pieces are placed in their correct starting positions.
+ */
+
     private void initializePieces() {
-        // Place knights on the board
-        board[0][2].put(new Piece(true, RESOURCES_WKNIGHT_PNG)); 
-        board[0][5].put(new Piece(true, RESOURCES_WKNIGHT_PNG));
-        board[7][2].put(new Piece(false, RESOURCES_BKNIGHT_PNG)); 
-        board[7][5].put(new Piece(false, RESOURCES_BKNIGHT_PNG));
+        
+
+        //Bisknight
+        board[0][1].put(new LongKnight(true, RESOURCES_WKNIGHT_PNG));
+        board[0][6].put(new LongKnight(true, RESOURCES_WKNIGHT_PNG));
+        board[7][1].put(new LongKnight(false, RESOURCES_BKNIGHT_PNG));
+        board[7][6].put(new LongKnight(false, RESOURCES_BKNIGHT_PNG));
+
+        //king
+        board[7][4].put(new KingButLessCode(false, RESOURCES_BKING_PNG));
+        board[0][4].put(new KingButLessCode(true, RESOURCES_WKING_PNG));
+        //Queen
+        board[7][3].put(new Queen(false, RESOURCES_BQUEEN_PNG));
+        board[0][3].put(new Queen(true, RESOURCES_WQUEEN_PNG));
+        //bishops 
+        board[7][2].put(new Bishop(false, RESOURCES_BBISHOP_PNG));
+        board[0][2].put(new Bishop(true, RESOURCES_WBISHOP_PNG));
+        board[0][5].put(new Bishop(true, RESOURCES_WBISHOP_PNG));
+        board[7][5].put(new Bishop(false, RESOURCES_BBISHOP_PNG));
+        //rock
+        board[0][0].put(new Rook(true, RESOURCES_WROOK_PNG));
+        board[7][0].put(new Rook(false, RESOURCES_BROOK_PNG));
+        board[7][7].put(new Rook(false, RESOURCES_BROOK_PNG));
+        board[0][7].put(new Rook(true, RESOURCES_WROOK_PNG));
+        //pawns 
+        int n=0;
+        while (n<8) {
+            board[1][n].put(new Pawn(true, RESOURCES_WPAWN_PNG));
+            n++;
+        }
+        n=0;
+        while (n<8) {
+            board[6][n].put(new Pawn(false, RESOURCES_BPAWN_PNG));
+            n++;
+        }
+    
+      
     }
 
-    /**
-     * Gets the 2D array of squares representing the board.
-     * Pre-condition: The board is initialized.
-     * Post-condition: The board is returned as a 2D array of squares.
-     */
+
     public Square[][] getSquareArray() {
         return this.board;
     }
 
-    /**
-     * Gets the current player's turn status.
-     * Pre-condition: The current turn (white or black) is set.
-     * Post-condition: The current turn status is returned.
-     */
+
     public boolean getTurn() {
         return whiteTurn;
     }
 
-    /**
-     * Sets the currently selected piece.
-     * Pre-condition: A piece is selected.
-     * Post-condition: The selected piece is set to the given piece.
-     */
+
     public void setCurrPiece(Piece p) {
         this.currPiece = p;
     }
 
-    /**
-     * Gets the currently selected piece.
-     * Pre-condition: A piece is selected.
-     * Post-condition: The selected piece is returned.
-     */
+
     public Piece getCurrPiece() {
         return this.currPiece;
     }
 
-    /**
-     * Paints the board and the pieces on the board.
-     * Pre-condition: The board and pieces are initialized.
-     * Post-condition: The board and pieces are painted to the screen.
-     */
+
     @Override
     public void paintComponent(Graphics g) {
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
                 Square sq = board[x][y];
                 if (sq == fromMoveSquare)
-                    sq.setBorder(BorderFactory.createLineBorder(Color.blue)); // Highlight the source square
+                    sq.setBorder(BorderFactory.createLineBorder(Color.blue));
                 sq.paintComponent(g);
             }
         }
-
         if (currPiece != null) {
-            if ((currPiece.getColor() && whiteTurn) || (!currPiece.getColor() && !whiteTurn)) {
-                final Image img = currPiece.getImage();
-                g.drawImage(img, currX, currY, null);
-            }
+            final Image img = currPiece.getImage();
+            g.drawImage(img, currX, currY, null);
         }
     }
 
-    /**
-     * Handles the event when a mouse is pressed.
-     * Pre-condition: A mouse button is pressed.
-     * Post-condition: The selected piece is captured, and the move square is highlighted.
-     */
+
     @Override
     public void mousePressed(MouseEvent e) {
         currX = e.getX();
         currY = e.getY();
-
         Square sq = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
+
 
         if (sq.isOccupied()) {
             currPiece = sq.getOccupyingPiece();
             fromMoveSquare = sq;
-            if (!currPiece.getColor() && whiteTurn)
-                return;
-            if (currPiece.getColor() && !whiteTurn)
-                return;
+            if (!currPiece.getColor() && whiteTurn) return;
+            if (currPiece.getColor() && !whiteTurn) return;
             sq.setDisplay(false);
         }
         repaint();
     }
 
-    /**
-     * Handles the event when the mouse is released.
-     * Pre-condition: The piece is moved to a new square.
-     * Post-condition: The piece is placed on the new square, or it is returned to its original position if the move is illegal.
-     */
+
     @Override
     public void mouseReleased(MouseEvent e) {
         Square endSquare = (Square) this.getComponentAt(new Point(e.getX(), e.getY()));
     
-        if (currPiece == null || fromMoveSquare == null) {
-            return;
-        }
+        if (currPiece == null || fromMoveSquare == null) return;
     
-        if ((whiteTurn && !currPiece.getColor()) || (!whiteTurn && currPiece.getColor())) {
-            return;
-        }
+        // Prevents moving if it's not the player's turn
+        if ((whiteTurn && !currPiece.getColor()) || (!whiteTurn && currPiece.getColor())) return;
     
         ArrayList<Square> legalMoves = currPiece.getLegalMoves(this, fromMoveSquare);
-    
         boolean isLegalMove = false;
-        for (int i = 0; i < legalMoves.size(); i++) {
-            if (legalMoves.get(i) == endSquare) {
+        
+        for (Square move : legalMoves) {
+            if (move == endSquare) {
                 isLegalMove = true;
                 break;
             }
         }
     
-        if (isLegalMove && (endSquare == null || !endSquare.isOccupied() || 
-            endSquare.getOccupyingPiece().getColor() != currPiece.getColor())) {
+        // Save the current board state
+        Piece capturedPiece = null;
+        if (isLegalMove && endSquare != null && endSquare.isOccupied()) {
+            capturedPiece = endSquare.getOccupyingPiece();
+        }
+    
+        if (isLegalMove) {
             fromMoveSquare.removePiece();
             endSquare.put(currPiece);
-            whiteTurn = !whiteTurn;  // Change turn after a successful move
+    
+            // If the move puts own king in check, undo the move
+            if (isInCheck(currPiece.getColor())) {
+                endSquare.removePiece();
+                fromMoveSquare.put(currPiece);
+                if (capturedPiece != null) {
+                    endSquare.put(capturedPiece);
+                }
+                return;
+            }
+    
+            whiteTurn = !whiteTurn;
         } else {
             fromMoveSquare.put(currPiece);
         }
     
-        // Remove border highlights from all squares
+        // Ensure the player moves out of check
+        if (isInCheck(!whiteTurn)) {
+            System.out.println("You must move out of check!");
+            endSquare.removePiece();
+            fromMoveSquare.put(currPiece);
+            if (capturedPiece != null) {
+                endSquare.put(capturedPiece);
+            }
+            return;
+        }
+    
+        // Clear borders
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 board[i][j].setBorder(null);
             }
         }
     
-        fromMoveSquare.setDisplay(true); // Make sure the square is displayed again
-        currPiece = null;  // Clear the selected piece
-        fromMoveSquare = null;  // Clear the move square
+        fromMoveSquare.setDisplay(true);
+        currPiece = null;
+        fromMoveSquare = null;
+    
         repaint();
     }
+    
+       
+// Precondition: The board is initialized and contains a king of either color
+// Postcondition: Returns true if the king is in check, false otherwise
+public boolean isInCheck(boolean kingColor) {
+    Square[][] board = this.getSquareArray();
+    Square kingSquare = null;
 
-    /**
-     * Handles dragging the piece around the board.
-     * Pre-condition: A piece is being dragged.
-     * Post-condition: The piece is updated at the mouse location, and legal move squares are highlighted.
-     */
+    // Find the king of the given color
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            Piece piece = board[row][col].getOccupyingPiece();
+            if (piece instanceof KingButLessCode && piece.getColor() == kingColor) {
+                kingSquare = board[row][col];
+                break;
+            }
+        }
+    }
+
+    // If no king is found (shouldn't happen), return false
+    if (kingSquare == null) return false;
+
+    // Check if any opponent piece controls the king's square
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            Piece piece = board[row][col].getOccupyingPiece();
+            if (piece != null && piece.getColor() != kingColor) {
+                ArrayList<Square> controlledSquares = piece.getControlledSquares(board, board[row][col]);
+                if (controlledSquares.contains(kingSquare)) {
+                    return true; // King is in check
+                }
+            }
+        }
+    }
+
+    return false; // King is not in check
+}
+
+          
+
     @Override
     public void mouseDragged(MouseEvent e) {
         currX = e.getX() - 24;
@@ -231,19 +301,9 @@ public class Board extends JPanel implements MouseListener, MouseMotionListener 
         repaint();
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {
-    }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    @Override public void mouseMoved(MouseEvent e) {}
+    @Override public void mouseClicked(MouseEvent e) {}
+    @Override public void mouseEntered(MouseEvent e) {}
+    @Override public void mouseExited(MouseEvent e) {}
 }
